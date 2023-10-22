@@ -1427,12 +1427,12 @@ def crc32(args):
     if rom_data['rom_file_type'] == 'bin':
         print(f"bin_crc32={rom_data['bin_crc32']}")
     elif rom_data['rom_file_type'] == 'rom':
-        print(f"rom_data_crc16s=|{str(rom_data['rom_data_crc16s'])}|")
-        print(f"rom_attr_crc16=|{str(rom_data['rom_attr_crc16'])}|")
-        print(f"rom_data_crc32s=|{str(rom_data['rom_data_crc32s'])}|")
-        print(f"rom_attr_crc32=|{str(rom_data['rom_attr_crc32'])}|")
+        print(f"rom_data_crc16s={str(rom_data['rom_data_crc16s'])}")
+        print(f"rom_attr_crc16={str(rom_data['rom_attr_crc16'])}")
+        print(f"rom_data_crc32s={str(rom_data['rom_data_crc32s'])}")
+        print(f"rom_attr_crc32={str(rom_data['rom_attr_crc32'])}")
     elif rom_data['rom_file_type'] == 'luigi':
-        print(f"luigi crcs={str(rom_data)}")
+        print(f"luigi crc32s={str(rom_data['luigi_crc32s'])}")
     return
 
 
