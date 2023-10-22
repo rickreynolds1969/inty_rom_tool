@@ -54,6 +54,7 @@ class RomParser(FileParser):
         ofs = 3
         rom_data = []
         data_crc16s = []
+        data_crc32s = []
         for i in range(0, uint_8s[1]):
             start_of_this_block = ofs
             lo = uint_8s[ofs] << 8
@@ -82,8 +83,10 @@ class RomParser(FileParser):
             # check the CRC-16 (for grins?)
             crc_expect = (uint_8s[ofs] << 8) | (uint_8s[ofs + 1] & 0xFF)
             crc_actual = checksum.crc16(uint_8s, start_of_this_block, 2 * (hi - lo) + 2)
+            crc32_actual = checksum.crc32(uint_8s, start_of_this_block, 2 * (hi - lo) + 2)
 
             data_crc16s.append(crc_expect)
+            data_crc32s.append(crc32_actual)
 
             if crc_expect != crc_actual:
                 warnings.append("Block found whose CRC entry doesn't match the CRC of the actual data: CRC in "
@@ -91,6 +94,7 @@ class RomParser(FileParser):
             ofs += 2
 
         data['rom_data_crc16s'] = ','.join(map(lambda x: "%04X" % x, data_crc16s))
+        data['rom_data_crc32s'] = ','.join(map(lambda x: "%08X" % x, data_crc32s))
 
         # read the attribute & fine address tables (3 & 4)
         start_of_attribute_table = ofs
@@ -102,8 +106,10 @@ class RomParser(FileParser):
         # check the CRC of the previous tables (5)
         crc_expect = (uint_8s[ofs] << 8) | (uint_8s[ofs + 1] & 0xFF)
         crc_actual = checksum.crc16(uint_8s, start_of_attribute_table, 48)
+        crc32_actual = checksum.crc32(uint_8s, start_of_attribute_table, 48)
 
         data['rom_attr_crc16'] = "%04X" % crc_expect
+        data['rom_attr_crc32'] = "%08X" % crc32_actual
 
         if crc_expect != crc_actual:
             warnings.append("Attribute and fine address tables' CRC entry doesn't match the CRC of the actual data: "
