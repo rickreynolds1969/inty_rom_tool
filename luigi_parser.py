@@ -197,7 +197,7 @@ class LuigiParser(FileParser):
                     luigi_meta['druid'] <<= 8
                     luigi_meta['druid'] += uint_8s[i]
 
-                luigi_meta['druid_hex'] = "%032X" % luigi_meta['druid']
+                luigi_meta['druid_hex'] = f"{luigi_meta['druid']:032X}"
                 luigi_meta['encrypted'] = True
 
                 calc_crc = checksum.crc32(uint_8s, ofs, len(uint_8s) - ofs)
@@ -254,7 +254,7 @@ class LuigiParser(FileParser):
 
             # print(f"end of block ofs={ofs}")
 
-        data['luigi_crc32s'] = ','.join(map(lambda x: "%08X" % x, block_crcs))
+        data['luigi_crc32s'] = ','.join(map(lambda x: f"{x:08X}", block_crcs))
         if luigi_meta is not None:
             data['luigi_meta'] = luigi_meta
         return (data, warnings)
