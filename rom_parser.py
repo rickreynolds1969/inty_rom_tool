@@ -89,12 +89,12 @@ class RomParser(FileParser):
             data_crc32s.append(crc32_actual)
 
             if crc_expect != crc_actual:
-                warnings.append("Block found whose CRC entry doesn't match the CRC of the actual data: CRC in "
-                                "rom=%x, CRC calculated=%x" % (crc_expect, crc_actual))
+                warnings.append(f"Block found whose CRC entry doesn't match the CRC of the actual data: CRC in "
+                                f"rom={crc_expect:0x}, CRC calculated={crc_actual:0x}")
             ofs += 2
 
-        data['rom_data_crc16s'] = ','.join(map(lambda x: "%04X" % x, data_crc16s))
-        data['rom_data_crc32s'] = ','.join(map(lambda x: "%08X" % x, data_crc32s))
+        data['rom_data_crc16s'] = ','.join(map(lambda x: f"{x:04X}", data_crc16s))
+        data['rom_data_crc32s'] = ','.join(map(lambda x: f"{x:08X}", data_crc32s))
 
         # read the attribute & fine address tables (3 & 4)
         start_of_attribute_table = ofs
@@ -108,12 +108,12 @@ class RomParser(FileParser):
         crc_actual = checksum.crc16(uint_8s, start_of_attribute_table, 48)
         crc32_actual = checksum.crc32(uint_8s, start_of_attribute_table, 48)
 
-        data['rom_attr_crc16'] = "%04X" % crc_expect
-        data['rom_attr_crc32'] = "%08X" % crc32_actual
+        data['rom_attr_crc16'] = f"{crc_expect:04X}"
+        data['rom_attr_crc32'] = f"{crc32_actual:08X}"
 
         if crc_expect != crc_actual:
-            warnings.append("Attribute and fine address tables' CRC entry doesn't match the CRC of the actual data: "
-                            "CRC in rom=%x, CRC calculated=%x" % (crc_expect, crc_actual))
+            warnings.append(f"Attribute and fine address tables' CRC entry doesn't match the CRC of the actual data: "
+                            f"CRC in rom={crc_expect:0x}, CRC calculated={crc_actual:0x}")
 
         ofs += 2
 
