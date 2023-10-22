@@ -30,7 +30,7 @@ class FileParser:
         # determine file type via the 3-byte header
         if uint_8s[0] == 0x4C and uint_8s[1] == 0x54 and uint_8s[2] == 0x4F:
             from luigi_parser import LuigiParser
-            parser = RomParser()
+            parser = LuigiParser()
             data, warnings = parser.parse_luigi(uint_8s)
 
         elif uint_8s[1] == (0xFF ^ uint_8s[2]):
