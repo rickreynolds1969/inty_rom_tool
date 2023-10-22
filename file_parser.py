@@ -29,10 +29,14 @@ class FileParser:
 
         # determine file type via the 3-byte header
         if uint_8s[0] == 0x4C and uint_8s[1] == 0x54 and uint_8s[2] == 0x4F:
-            data, warnings = self.parse_luigi(uint_8s)
+            from luigi_parser import LuigiParser
+            parser = RomParser()
+            data, warnings = parser.parse_luigi(uint_8s)
 
         elif uint_8s[1] == (0xFF ^ uint_8s[2]):
-            data, warnings = self.parse_rom(uint_8s)
+            from rom_parser import RomParser
+            parser = RomParser()
+            data, warnings = parser.parse_rom(uint_8s)
 
         else:
             data, warnings = self.parse_bin(uint_8s)
@@ -52,11 +56,3 @@ class FileParser:
         data['bin_crc32'] = f"{checksum.crc32(uint_8s):08X}"
         data['bin_md5'] = checksum.md5_hex_str(uint_8s)
         return (data, warnings)
-
-    def parse_luigi(self, uint_8s):
-        raise Exception("Must be implemented in child class.")
-        return
-
-    def parse_rom(self, uint_8s):
-        raise Exception("Must be implemented in child class.")
-        return
