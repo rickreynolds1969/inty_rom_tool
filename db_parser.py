@@ -19,6 +19,9 @@ class DbParser(FileParser):
                              'options', 'kbdhackfile', 'cfg_file', 'comments')
         return
 
+    def get_fields_order(self):
+        return self.fields_order
+
     def read_inty_data_file(self, filename):
         db_header = ''
         d = []
@@ -138,8 +141,6 @@ class DbParser(FileParser):
 
         # with open('inty_data_file.yaml', 'w') as fh:
         #     yaml.dump(self.db, fh)
-
-        self.dirty = False
         return
 
     def write_ascii_record(self, rom, filename=None):

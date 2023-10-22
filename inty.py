@@ -139,11 +139,6 @@ class IntellivisionRomsDB:
         self.laptop_default_ecs_kbdhackfile = 'basic'
         self.frinkiac7_default_kbdhackfile = 'basic'
         self.temp_dir = '/tmp'
-        self.db_delimiter = '#--- 8< cut here 8< ---'
-        self.fields_order = ('id', 'name', 'flashback_name', 'good_name', 'rom_data_md5', 'rom_attr_md5', 'bin_md5',
-                             'bin_crc32', 'cowering_crc32', 'rom_data_crc16s', 'rom_attr_crc16', 'luigi_crc32s',
-                             'encrypted', 'cc3_desc', 'cc3_filename', 'tags', 'paid', 'variant_of', 'author', 'year',
-                             'options', 'kbdhackfile', 'cfg_file', 'comments')
         self.dirty = False
         self.number_of_backups_to_keep = 9
 
@@ -173,9 +168,6 @@ class IntellivisionRomsDB:
 
     def get_kbdhackfile_dir(self):
         return self.kbdhackfile_dir
-
-    def get_fields_order(self):
-        return self.fields_order
 
     def get_laptop_default_ecs_kbdhackfile(self):
         return self.laptop_default_ecs_kbdhackfile
@@ -1517,7 +1509,8 @@ def show(args):
         return
 
     print(f'== {args.id.upper()} ==')
-    for k in inty.get_fields_order():
+    dbparser = DbParser()
+    for k in dbparser.get_fields_order():
         if rec[k] is not None:
             # treat multi-line fields rightly
             if k == 'cfg_file':
