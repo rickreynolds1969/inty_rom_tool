@@ -50,7 +50,6 @@ import re
 import json
 import argparse
 import subprocess
-# import yaml
 
 tool_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(tool_dir)
@@ -286,11 +285,12 @@ class IntellivisionRomsDB:
             ids.append(rom['id'])
         return ids
 
-    def get_record_from_FIELD(self, field, value):
+    def get_record_index_from_FIELD(self, field, value):
         if field == 'cc3_filename':
             value = value.lower()
 
-        for rec in self.db:
+        for rec_idx in range(0, len(self.db)):
+            rec = self.db[rec_idx]
             found = False
 
             if ',' in value:
@@ -317,8 +317,14 @@ class IntellivisionRomsDB:
                     found = True
 
             if found is True:
-                return rec
+                return rec_idx
         return None
+
+    def get_record_from_FIELD(self, field, value):
+        idx = self.get_record_index_from_FIELD(field, value):
+        if idx is None:
+            return None
+        return self.db[idx]
 
     def get_record_from_FIELDS(self, query):
         if isinstance(query, dict):
@@ -485,15 +491,10 @@ class IntellivisionRomsDB:
             findid = new_rec['replace_id']
             del new_rec['replace_id']
 
-        rom_index = -1
+        rom_index = self.get_record_index_from_id(findid)
 
-        for i in range(0, len(self.db)):
-            if self.db[i]['id'] == findid:
-                rom_index = i
-                break
-
-        if rom_index < 0:
-            raise Exception(f"Didn't find record for replacement.  ID:{findid}")
+        if rom_index is None:
+            raise Exception(f"Didn't find record for replacement, ID:{findid}")
 
         self.db[rom_index] = new_rec
         self.dirty = True
@@ -507,6 +508,12 @@ class IntellivisionRomsDB:
         return
 
     def wash_rom(self, filename):
+        #
+        # "wash" a romfile
+        #
+        # Basically, calculate the CRCs for the given file and if it is a non-bin convert to bin and calculate CRCs
+        # for the result.
+        #
         parser = FileParser()
         origcrcdata, origwarnings = parser.calc_crcs_for_file(filename)
 
@@ -521,21 +528,9 @@ class IntellivisionRomsDB:
         output['rom_file_type'] = origcrcdata['rom_file_type']
 
         if origcrcdata['rom_file_type'] == 'bin':
-            # convert bin to rom to get those CRCs
-            shell.exc(f"cp '{filename}' {self.temp_dir}/xxx.bin")
-            if os.path.isfile(f'{basename}.cfg'):
-                shell.exc(f"cp '{basename}.cfg' {self.temp_dir}/xxx.cfg")
-            if os.path.isfile(f'{basename}.CFG'):
-                shell.exc(f"cp '{basename}.CFG' {self.temp_dir}/xxx.cfg")
-            shell.exc(f"cd {self.temp_dir} ; {bin2rom} xxx.bin > /dev/null")
-
-            romcrcdata, warnings = parser.calc_crcs_for_file(f'{self.temp_dir}/xxx.rom')
-
-            # TODO: check warnings
-
-            output['bin_cowering_crc32'] = f"{checksum.cowering_crc32_from_file(filename):08X}"
-            output['bincrcdata'] = origcrcdata
-            output['romcrcdata'] = romcrcdata
+            # I used to convert bin files to roms and get CRCs for the converted roms.  I'm no longer convinced
+            # that is a good idea
+            pass
 
         elif origcrcdata['rom_file_type'] == 'rom':
             # convert rom to bin to get CRCs
@@ -554,6 +549,7 @@ class IntellivisionRomsDB:
         elif origcrcdata['rom_file_type'] == 'luigi':
             output['luigicrcdata'] = origcrcdata
 
+            # luigis can be encrypted (indeed, all mine are) and so there is only so much data we can get
             try:
                 enc = output['luigicrcdata']['luigi_meta']['encrypted']
             except Exception:
@@ -1090,7 +1086,7 @@ def fetchrom(args):
 
 @subcommand([argument("filename", help="Game filename.")])
 def wash(args):
-    """ "Wash" a ROM by converting to .bin and back to .rom. """
+    """ "Wash" a ROM - get CRCs for both ROM/LUIGI for and also .bin. """
     inty = IntellivisionRomsDB()
     data = inty.wash_rom(args.filename)
     print(data)
